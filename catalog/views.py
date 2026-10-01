@@ -146,8 +146,23 @@ def order_history(request):
     orders = Order.objects.filter(pk__in=order_ids).prefetch_related("items").order_by("-created_at")
     progress_steps = ["pending", "processing", "shipped", "complete"]
     for order in orders:
-        order.progress_index = progress_steps.index(order.status)
+        order.can_cancel = order.status in {"pending", "processing"}
+        order.progress_index = progress_steps.index(order.status) if order.status in progress_steps else None
     return render(request, "catalog/order_history.html", {
         "orders": orders,
         "progress_steps": progress_steps,
     })
+
+
+def order_cancel(request, order_id):
+    if request.method != "POST":
+        return redirect("order_history")
+    order_ids = request.session.get("order_ids", [])
+    order = get_object_or_404(Order, pk=order_id, pk__in=order_ids)
+    if order.status not in {"pending", "processing"}:
+        messages.error(request, "This order can no longer be cancelled.")
+        return redirect("order_history")
+    order.status = "cancelled"
+    order.save(update_fields=["status"])
+    messages.success(request, f"Order #{order.pk} has been cancelled.")
+    return redirect("order_history")

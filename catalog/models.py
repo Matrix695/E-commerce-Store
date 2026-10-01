@@ -26,7 +26,7 @@ class Product(models.Model):
 
 
 class Order(models.Model):
-    STATUS_CHOICES = [("pending", "Pending"), ("processing", "Processing"), ("shipped", "Shipped"), ("complete", "Complete")]
+    STATUS_CHOICES = [("pending", "Pending"), ("processing", "Processing"), ("shipped", "Shipped"), ("complete", "Complete"), ("cancelled", "Cancelled")]
     name = models.CharField(max_length=120)
     email = models.EmailField()
     address = models.CharField(max_length=220)

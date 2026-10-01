@@ -116,6 +116,49 @@ class StoreFlowTests(TestCase):
         self.assertContains(response, "Processing")
         self.assertNotContains(response, f"Order #{unrelated_order.pk}")
 
+    def test_pending_order_can_be_cancelled_from_order_history(self):
+        order = Order.objects.create(
+            name="Taylor Example", email="taylor@example.com", address="12 Market Street",
+            city="Portland", postal_code="97201",
+        )
+        session = self.client.session
+        session["order_ids"] = [order.pk]
+        session.save()
+
+        response = self.client.post(reverse("order_cancel", args=[order.pk]))
+
+        self.assertRedirects(response, reverse("order_history"))
+        order.refresh_from_db()
+        self.assertEqual(order.status, "cancelled")
+        self.assertContains(self.client.get(reverse("order_history")), "Cancelled")
+
+    def test_shipped_order_cannot_be_cancelled(self):
+        order = Order.objects.create(
+            name="Taylor Example", email="taylor@example.com", address="12 Market Street",
+            city="Portland", postal_code="97201", status="shipped",
+        )
+        session = self.client.session
+        session["order_ids"] = [order.pk]
+        session.save()
+
+        response = self.client.post(reverse("order_cancel", args=[order.pk]))
+
+        self.assertRedirects(response, reverse("order_history"))
+        order.refresh_from_db()
+        self.assertEqual(order.status, "shipped")
+
+    def test_order_not_owned_by_session_cannot_be_cancelled(self):
+        order = Order.objects.create(
+            name="Other Customer", email="other@example.com", address="1 Other Street",
+            city="Portland", postal_code="97201",
+        )
+
+        response = self.client.post(reverse("order_cancel", args=[order.pk]))
+
+        self.assertEqual(response.status_code, 404)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "pending")
+
     def test_like_product_adds_to_favorites_session(self):
         response = self.client.post(reverse("favorite_toggle", args=[self.product.pk]), {"next": reverse("home")})
 

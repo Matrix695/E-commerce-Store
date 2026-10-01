@@ -223,3 +223,11 @@ document.querySelectorAll('.messages').forEach((messages) => {
     window.setTimeout(() => messages.remove(), 350);
   }, 3200);
 });
+
+document.querySelectorAll('.cancel-order-form').forEach((form) => {
+  form.addEventListener('submit', (event) => {
+    if (!window.confirm(form.dataset.confirm)) {
+      event.preventDefault();
+    }
+  });
+});

@@ -12,5 +12,6 @@ urlpatterns = [
     path("favorites/toggle/<int:product_id>/", views.favorite_toggle, name="favorite_toggle"),
     path("checkout/", views.checkout, name="checkout"),
     path("orders/", views.order_history, name="order_history"),
+    path("orders/<int:order_id>/cancel/", views.order_cancel, name="order_cancel"),
     path("orders/<int:order_id>/", views.order_confirmation, name="order_confirmation"),
 ]

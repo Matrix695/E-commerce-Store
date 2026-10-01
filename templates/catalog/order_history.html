@@ -18,14 +18,16 @@
             </div>
             <strong class="order-total">₹{{ order.total|floatformat:0|intcomma }}</strong>
           </header>
-          <ol class="order-progress" aria-label="Delivery progress: {{ order.get_status_display }}">
-            {% for step in progress_steps %}
-              <li class="{% if forloop.counter0 <= order.progress_index %}is-reached{% endif %}{% if forloop.counter0 == order.progress_index %} is-current{% endif %}">
-                <span class="progress-dot" aria-hidden="true"></span>
-                <span>{{ step|capfirst }}</span>
-              </li>
-            {% endfor %}
-          </ol>
+          {% if order.status != "cancelled" %}
+            <ol class="order-progress" aria-label="Delivery progress: {{ order.get_status_display }}">
+              {% for step in progress_steps %}
+                <li class="{% if forloop.counter0 <= order.progress_index %}is-reached{% endif %}{% if forloop.counter0 == order.progress_index %} is-current{% endif %}">
+                  <span class="progress-dot" aria-hidden="true"></span>
+                  <span>{{ step|capfirst }}</span>
+                </li>
+              {% endfor %}
+            </ol>
+          {% endif %}
           <div class="order-items">
             {% for item in order.items.all %}
               <div class="order-item">
@@ -34,7 +36,13 @@
               </div>
             {% endfor %}
           </div>
-          <p class="order-status">{{ order.get_status_display }}{% if order.status == "complete" %} · Delivered{% elif order.status == "shipped" %} · On its way{% elif order.status == "processing" %} · Being prepared{% else %} · Order received{% endif %}</p>
+          <p class="order-status">{{ order.get_status_display }}{% if order.status == "cancelled" %} · This order will not be delivered{% elif order.status == "complete" %} · Delivered{% elif order.status == "shipped" %} · On its way{% elif order.status == "processing" %} · Being prepared{% else %} · Order received{% endif %}</p>
+          {% if order.can_cancel %}
+            <form class="cancel-order-form" method="post" action="{% url 'order_cancel' order.pk %}" data-confirm="Cancel order #{{ order.pk }}?">
+              {% csrf_token %}
+              <button class="cancel-order-button" type="submit">Cancel order</button>
+            </form>
+          {% endif %}
         </article>
       {% endfor %}
     </div>
