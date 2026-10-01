@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Liked — Haven{% endblock %}
+{% block content %}
+<section class="favorites-page">
+  <header class="favorites-header">
+    <p class="eyebrow">Your collection</p>
+    <h1><em>Liked.</em></h1>
+  </header>
+  {% if liked_products %}
+    <div class="favorites-grid">
+      {% for product in liked_products %}
+      <article class="product-card favorites-card">
+        <a class="product-image" href="{{ product.get_absolute_url }}"><img src="{{ product.image_url }}" alt="{{ product.image_alt }}" loading="lazy"><span class="product-tag">{{ product.category }}</span></a>
+        <div class="product-meta"><div><a class="product-name" href="{{ product.get_absolute_url }}">{{ product.name }}</a><p class="product-subtitle">On your liked list</p></div><span class="price">₹{{ product.price|floatformat:0|intcomma }}</span></div>
+        <form method="post" action="{% url 'favorite_toggle' product.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'favorites' %}">
+          <button class="favorite-toggle is-active" type="submit" aria-label="Remove {{ product.name }} from liked items"><span aria-hidden="true">♥</span></button>
+        </form>
+        <div class="bag-action-group">
+          <form method="post" action="{% url 'cart_add' product.id %}" class="cart-form">{% csrf_token %}<input type="hidden" name="quantity" value="1"><input type="hidden" name="next" value="{% url 'favorites' %}"><button class="quick-add" type="submit" aria-label="Add {{ product.name }} to bag">Add to bag <span>+</span></button></form>
+          <a class="checkout-inline" href="{% url 'checkout' %}">Checkout</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="favorites-empty">
+      <p>You don’t have any liked items yet.</p>
+      <a class="button button-dark" href="{% url 'home' %}#shop">Browse the collection <span>↗</span></a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

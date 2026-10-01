@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Your orders — Haven{% endblock %}
+{% block content %}
+<section class="orders-page">
+  <header class="orders-heading">
+    <p class="eyebrow">A little something to look forward to</p>
+    <h1>Your <em>orders.</em></h1>
+  </header>
+  {% if orders %}
+    <div class="orders-list">
+      {% for order in orders %}
+        <article class="order-entry">
+          <header class="order-entry-heading">
+            <div>
+              <p class="eyebrow">Order #{{ order.pk }}</p>
+              <p class="order-date">Placed {{ order.created_at|date:"F j, Y" }}</p>
+            </div>
+            <strong class="order-total">₹{{ order.total|floatformat:0|intcomma }}</strong>
+          </header>
+          <ol class="order-progress" aria-label="Delivery progress: {{ order.get_status_display }}">
+            {% for step in progress_steps %}
+              <li class="{% if forloop.counter0 <= order.progress_index %}is-reached{% endif %}{% if forloop.counter0 == order.progress_index %} is-current{% endif %}">
+                <span class="progress-dot" aria-hidden="true"></span>
+                <span>{{ step|capfirst }}</span>
+              </li>
+            {% endfor %}
+          </ol>
+          <div class="order-items">
+            {% for item in order.items.all %}
+              <div class="order-item">
+                <span>{{ item.product_name }} <small>× {{ item.quantity }}</small></span>
+                <span>₹{{ item.line_total|floatformat:0|intcomma }}</span>
+              </div>
+            {% endfor %}
+          </div>
+          <p class="order-status">{{ order.get_status_display }}{% if order.status == "complete" %} · Delivered{% elif order.status == "shipped" %} · On its way{% elif order.status == "processing" %} · Being prepared{% else %} · Order received{% endif %}</p>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="orders-empty">
+      <p>You haven’t placed an order yet.</p>
+      <a class="button button-dark" href="{% url 'home' %}#shop">Explore the collection <span>↗</span></a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

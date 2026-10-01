@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Order received — Haven{% endblock %}
+{% block content %}
+<section class="confirmation"><span class="confirmation-seal" aria-hidden="true">✳</span><p class="eyebrow">Order {{ order.id }} · {{ order.get_status_display }}</p><h1>Something good<br><em>is on its way.</em></h1><p class="confirmation-copy">Thanks, {{ order.name }}. We’ve got your order and sent the details to <strong>{{ order.email }}</strong>.</p><div class="confirmation-recap">{% for item in order.items.all %}<div><span>{{ item.product_name }} <small>× {{ item.quantity }}</small></span><strong>₹{{ item.line_total|floatformat:0|intcomma }}</strong></div>{% endfor %}<div class="confirmation-total"><span>Total</span><strong>₹{{ order.total|floatformat:0|intcomma }}</strong></div></div><a class="button button-dark" href="{% url 'home' %}#shop">Back to the good things <span>↗</span></a></section>
+{% endblock %}

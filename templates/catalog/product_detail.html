@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ product.name }} — Haven{% endblock %}
+{% block content %}
+<div class="breadcrumbs"><a href="{% url 'home' %}">Home</a><span>/</span><a href="{% url 'home' %}?category={{ product.category }}#shop">{{ product.category }}</a><span>/</span><span>{{ product.name }}</span></div>
+<section class="detail-layout">
+  <div class="detail-image"><img src="{{ product.image_url }}" alt="{{ product.image_alt }}"></div>
+  <div class="detail-copy"><p class="eyebrow">{{ product.category }} · Haven selection</p><h1>{{ product.name }}</h1><p class="detail-price">₹{{ product.price|floatformat:0|intcomma }}</p><div class="detail-rule"></div><p class="detail-description">{{ product.description }}</p><p class="detail-shipping"><span aria-hidden="true">✳</span> Thoughtfully packed and on its way in 2–4 days.</p>
+    <div class="bag-action-group">
+      <form class="detail-add" method="post" action="{% url 'cart_add' product.id %}">{% csrf_token %}<label class="sr-only" for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" value="1" min="1" max="99"><button class="button button-dark" type="submit">Add to bag <span>+</span></button></form>
+      <a class="checkout-inline" href="{% url 'checkout' %}">Checkout</a>
+    </div>
+    <div class="detail-perks"><p><span>01</span> Made to be lived with</p><p><span>02</span> Complimentary gift note</p><p><span>03</span> Easy, thoughtful returns</p></div>
+  </div>
+</section>
+{% if related %}<section class="related-section"><div class="section-heading"><div><p class="eyebrow">You might also like</p><h2>Good company.</h2></div><a class="text-link" href="{% url 'home' %}#shop">Shop everything <span>↗</span></a></div><div class="product-grid">{% for item in related %}<article class="product-card"><a class="product-image" href="{{ item.get_absolute_url }}"><img src="{{ item.image_url }}" alt="{{ item.image_alt }}" loading="lazy"></a><div class="product-meta"><a class="product-name" href="{{ item.get_absolute_url }}">{{ item.name }}</a><span class="price">₹{{ item.price|floatformat:0|intcomma }}</span></div><div class="bag-action-group"><form method="post" action="{% url 'cart_add' item.id %}" class="cart-form">{% csrf_token %}<input type="hidden" name="quantity" value="1"><button class="quick-add" type="submit" aria-label="Add {{ item.name }} to bag">Add to bag <span>+</span></button></form><a class="checkout-inline" href="{% url 'checkout' %}">Checkout</a></div></article>{% endfor %}</div></section>{% endif %}
+{% endblock %}

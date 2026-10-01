@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load static humanize %}
+{% block title %}Haven — Considered pieces for everyday living{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-slides" aria-live="polite">
+    <div class="hero-slide is-active" data-caption="A considered home, made for living" data-image="{% static 'catalog/products/home-lifestyle-01.jpg' %}" role="img" aria-label="Thoughtfully furnished contemporary living room"></div>
+    <div class="hero-slide" data-caption="Warm textures, quiet moments" data-image="{% static 'catalog/products/home-lifestyle-02.jpg' %}" role="img" aria-label="Warm, layered living room interior"></div>
+    <div class="hero-slide" data-caption="Make space for everyday rituals" data-image="{% static 'catalog/products/home-lifestyle-03.jpg' %}" role="img" aria-label="Natural light falling across a welcoming home"></div>
+  </div>
+  <div class="hero-copy">
+    <p class="eyebrow">A softer kind of everyday</p>
+    <h1>Good things<br>for <em>good living.</em></h1>
+    <p>Considered objects, honest materials, and the little details that make a house feel like yours.</p>
+    <a class="button button-light" href="#shop">Find your favorite <span aria-hidden="true">↘</span></a>
+  </div>
+</section>
+<section class="intro-strip">
+  <span class="intro-star" aria-hidden="true">✳</span>
+  <p>Made with care.<br><em>Kept for years.</em></p>
+  <p class="intro-aside">A growing collection of useful, beautiful things from small makers and good materials.</p>
+  <a href="#shop" class="text-link">Meet your next favorite <span>↗</span></a>
+</section>
+<section class="shop-section" id="shop">
+  <div class="section-heading">
+    <div><p class="eyebrow">The considered collection</p><h2>Bring a little <em>better</em> home.</h2></div>
+    <form class="search-form" action="{% url 'home' %}#shop" method="get"><label class="sr-only" for="search">Search products</label><input id="search" name="q" type="search" placeholder="Search the shop" value="{{ query }}"><button aria-label="Search">⌕</button></form>
+  </div>
+  <div class="shop-tools">
+    <nav class="category-tabs" aria-label="Shop by category">
+      <a class="{% if not active_category %}is-active{% endif %}" href="{% url 'home' %}#shop">Everything</a>
+      {% for value, label in categories %}<a class="{% if active_category == value %}is-active{% endif %}" href="?category={{ value }}#shop">{{ label }}</a>{% endfor %}
+    </nav>
+    <span class="results-count">{{ products|length }} pieces</span>
+  </div>
+  <div class="product-grid">
+    {% for product in products %}
+    <article class="product-card">
+      <div class="product-image-wrap">
+        <a class="product-image" href="{{ product.get_absolute_url }}"><img src="{{ product.image_url }}" alt="{{ product.image_alt }}" loading="lazy"><span class="product-tag">{{ product.category }}</span></a>
+        <form method="post" action="{% url 'favorite_toggle' product.id %}" class="favorite-toggle-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'home' %}#shop">
+          <button class="favorite-toggle {% if product.id in favorite_ids %}is-active{% endif %}" data-product-name="{{ product.name }}" type="submit" aria-label="{% if product.id in favorite_ids %}Remove {{ product.name }} from liked items{% else %}Add {{ product.name }} to liked items{% endif %}">
+            <span aria-hidden="true">{% if product.id in favorite_ids %}♥{% else %}♡{% endif %}</span>
+          </button>
+        </form>
+      </div>
+      <div class="product-meta"><div><a class="product-name" href="{{ product.get_absolute_url }}">{{ product.name }}</a><p class="product-subtitle">Made for your everyday</p></div><span class="price">₹{{ product.price|floatformat:0|intcomma }}</span></div>
+      <div class="bag-action-group">
+        <form method="post" action="{% url 'cart_add' product.id %}" class="cart-form">{% csrf_token %}<input type="hidden" name="quantity" value="1"><input type="hidden" name="next" value="{% url 'home' %}#shop"><button class="quick-add" type="submit" aria-label="Add {{ product.name }} to bag">Add to bag <span>+</span></button></form>
+        <a class="checkout-inline" href="{% url 'checkout' %}">Checkout</a>
+      </div>
+    </article>
+    {% empty %}<div class="empty-state"><h3>Nothing on this shelf just yet.</h3><a class="text-link" href="{% url 'home' %}#shop">See everything <span>↗</span></a></div>{% endfor %}
+  </div>
+</section>
+<section class="note-band"><div class="note-image" role="img" aria-label="A calm, naturally furnished room"></div><div class="note-copy"><p class="eyebrow">The Haven point of view</p><h2>Less, but<br><em>more meaningful.</em></h2><p>We believe the things we live with should earn their place. That's why we look for thoughtful design, materials that age well, and makers who care how things are made.</p><a class="button button-dark" href="#shop">Explore the collection <span>↗</span></a></div></section>
+{% endblock %}
+
+{% block js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const form = document.querySelector(".search-form");
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const query = form.querySelector("input[name='q']").value;
+      window.location.href = "{% url 'home' %}#shop?q=" + encodeURIComponent(query);
+    });
+  });
+</script>
+{% endblock %}
+
+{% block css %}
+<style>
+  .search-form {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+  .search-form input {
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 0.25em;
+  }
+  .search-form button {
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 0.25em;
+    background-color: #f5f5f5;
+  }
+</style>
+{% endblock %}
+
+{% block background %}
+{
+    "owner": "django",
+    "pattern": [
+        {
+            "regexp": "^$"
+        }
+    ],
+    "background": {
+        "activeOnStart": true,
+        "beginsPattern": "Starting development server at",
+        "endsPattern": "Starting development server at"
+    }
+}
+{% endblock %}

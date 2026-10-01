@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Django: run storefront",
+      "type": "shell",
+      "command": "${workspaceFolder}\\run_storefront.bat",
+      "options": {"cwd": "${workspaceFolder}"},
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "django",
+        "pattern": [{
+          "regexp": "^(.+?):(\\d+):\\s*(.+)$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        }],
+        "background": {
+          "activeOnStart": false,
+          "beginsPattern": "Haven is starting",
+          "endsPattern": "Starting development server at"
+        }
+      }
+    }
+  ]
+}
