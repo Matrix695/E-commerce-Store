@@ -20,6 +20,31 @@ const updateBagCounts = (count) => {
   }
 };
 
+let bagNotificationTimeout;
+let bagNotificationHideTimeout;
+
+const showBagNotification = (message, count) => {
+  const notification = document.querySelector('.bag-notification');
+  if (!notification) return;
+
+  const itemCount = Number.isFinite(Number(count)) ? Number(count) : 0;
+  notification.querySelector('.bag-notification-message').textContent = message;
+  notification.querySelector('.bag-notification-count').textContent = `${itemCount} ${itemCount === 1 ? 'item' : 'items'} in your bag`;
+
+  window.clearTimeout(bagNotificationTimeout);
+  window.clearTimeout(bagNotificationHideTimeout);
+  notification.hidden = false;
+  notification.classList.remove('is-visible');
+  window.requestAnimationFrame(() => notification.classList.add('is-visible'));
+
+  bagNotificationTimeout = window.setTimeout(() => {
+    notification.classList.remove('is-visible');
+    bagNotificationHideTimeout = window.setTimeout(() => {
+      notification.hidden = true;
+    }, 220);
+  }, 3200);
+};
+
 const updateFavoriteCounts = (count) => {
   const numericCount = Number.isFinite(Number(count)) ? Number(count) : 0;
   const likedLink = document.querySelector('.liked-link');
@@ -100,6 +125,7 @@ document.querySelectorAll('.cart-form, .detail-add').forEach((form) => {
       if (response.ok && data.success) {
         form.classList.add('is-added');
         updateBagCounts(data.cart_count ?? 0);
+        showBagNotification(data.message || 'Item added to your bag.', data.cart_count ?? 0);
         checkoutLink?.classList.add('is-visible');
         return;
       }

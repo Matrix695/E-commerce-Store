@@ -30,6 +30,9 @@ class StoreFlowTests(TestCase):
             "cart_count": 2,
             "checkout_url": "/checkout/",
         })
+        home_response = self.client.get(reverse("home"))
+        self.assertContains(home_response, 'class="bag-notification"')
+        self.assertNotContains(home_response, f"{self.product.name} added to your bag.")
 
     def test_ajax_cart_remove_returns_updated_count_and_total(self):
         remaining_product = Product.objects.create(

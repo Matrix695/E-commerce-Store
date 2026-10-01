@@ -8,15 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'catalog/styles.css' %}">
-  <script defer src="{% static 'catalog/store.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'catalog/styles.css' %}?v=5">
+  <script defer src="{% static 'catalog/store.js' %}?v=2"></script>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
   <div class="announcement">Thoughtful things, made to be lived with <span>·</span> Complimentary shipping over ₹12,500</div>
   <header class="site-header">
     <button class="menu-toggle icon-button" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span></button>
-    <a class="wordmark" href="{% url 'home' %}" aria-label="Haven home">haven<span>.</span></a>
+    <a class="wordmark" href="{% url 'home' %}" aria-label="Haven home">Haven<span>.</span></a>
     <nav class="site-nav" id="site-nav">
       <a href="{% url 'home' %}#shop">Shop all</a>
       <a href="{% url 'home' %}?category=Objects#shop">Objects</a>
@@ -25,12 +25,19 @@
       <a class="liked-link" href="{% url 'favorites' %}">Liked{% if favorite_count %} <span class="bag-count favorite-count">{{ favorite_count }}</span>{% endif %}</a>
       <a href="{% url 'order_history' %}">Orders</a>
     </nav>
-    <a class="bag-link" href="{% url 'cart' %}" aria-label="Shopping bag, {{ cart_count }} items">Bag <span class="bag-count">{{ cart_count }}</span></a>
+    <a class="bag-link" href="{% url 'cart' %}" aria-label="Shopping bag, {{ cart_count }} items">
+      <svg class="bag-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>
+      <span>Bag</span><span class="bag-count">{{ cart_count }}</span>
+    </a>
   </header>
+  <div class="bag-notification" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <strong class="bag-notification-message"></strong>
+    <span class="bag-notification-count"></span>
+  </div>
   {% if messages %}<div class="messages" role="status">{% for message in messages %}<p>{{ message }}</p>{% endfor %}</div>{% endif %}
   <main>{% block content %}{% endblock %}</main>
   <footer class="site-footer">
-    <a class="wordmark footer-mark" href="{% url 'home' %}">haven<span>.</span></a>
+    <a class="wordmark footer-mark" href="{% url 'home' %}">Haven<span>.</span></a>
     <p>Make room for the everyday.</p>
     <small>Independent living goods · Est. 2024</small>
     <span class="footer-note">© Haven Studio</span>

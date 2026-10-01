@@ -45,7 +45,6 @@ def cart_add(request, product_id):
     key = str(product.pk)
     cart[key] = min(int(cart.get(key, 0)) + int(request.POST.get("quantity", 1)), 99)
     request.session["cart"] = cart
-    messages.success(request, f"{product.name} added to your bag.")
     cart_count = sum(int(quantity) for quantity in cart.values())
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({
@@ -54,6 +53,7 @@ def cart_add(request, product_id):
             "cart_count": cart_count,
             "checkout_url": "/checkout/",
         })
+    messages.success(request, f"{product.name} added to your bag.")
     return redirect(request.POST.get("next") or "cart")
 
 
