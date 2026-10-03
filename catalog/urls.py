@@ -11,6 +11,7 @@ urlpatterns = [
         redirect_authenticated_user=True,
     ), name="login"),
     path("accounts/logout/", LogoutView.as_view(), name="logout"),
+    path("products/suggestions/", views.product_suggestions, name="product_suggestions"),
     path("", views.home, name="home"),
     path("product/<slug:slug>/", views.product_detail, name="product_detail"),
     path("cart/", views.cart_view, name="cart"),

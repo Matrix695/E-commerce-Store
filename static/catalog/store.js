@@ -7,6 +7,125 @@ menuButton?.addEventListener('click', () => {
   siteNav?.classList.toggle('is-open', !isOpen);
 });
 
+const productSearchForm = document.querySelector('.header-search-form');
+const productSearchInput = productSearchForm?.querySelector('input[name="q"]');
+const productSuggestions = productSearchForm?.querySelector('.search-suggestions');
+const productSearchStatus = productSearchForm?.querySelector('#product-search-status');
+let suggestionRequest;
+let suggestionTimer;
+let activeSuggestionIndex = -1;
+
+const closeProductSuggestions = () => {
+  if (!productSearchInput || !productSuggestions) return;
+  productSuggestions.hidden = true;
+  productSearchInput.setAttribute('aria-expanded', 'false');
+  productSearchInput.removeAttribute('aria-activedescendant');
+  activeSuggestionIndex = -1;
+};
+
+const showProductSuggestions = (suggestions) => {
+  if (!productSearchInput || !productSuggestions || !productSearchStatus) return;
+  productSuggestions.replaceChildren();
+
+  if (!suggestions.length) {
+    const empty = document.createElement('li');
+    empty.className = 'search-suggestion-empty';
+    empty.textContent = 'No matching products found.';
+    productSuggestions.append(empty);
+    productSearchStatus.textContent = 'No matching products found.';
+  } else {
+    suggestions.forEach((suggestion, index) => {
+      const option = document.createElement('li');
+      option.className = 'search-suggestion';
+      option.id = `product-suggestion-${index}`;
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', 'false');
+
+      const link = document.createElement('a');
+      link.href = suggestion.url;
+      link.tabIndex = -1;
+
+      const name = document.createElement('span');
+      name.className = 'search-suggestion-name';
+      name.textContent = suggestion.name;
+      const category = document.createElement('span');
+      category.className = 'search-suggestion-category';
+      category.textContent = suggestion.category;
+
+      link.append(name, category);
+      option.append(link);
+      productSuggestions.append(option);
+    });
+    productSearchStatus.textContent = `${suggestions.length} product suggestions available.`;
+  }
+
+  productSuggestions.hidden = false;
+  productSearchInput.setAttribute('aria-expanded', 'true');
+};
+
+productSearchInput?.addEventListener('input', () => {
+  window.clearTimeout(suggestionTimer);
+  suggestionRequest?.abort();
+  const query = productSearchInput.value.trim();
+  if (query.length < 2) {
+    closeProductSuggestions();
+    if (productSearchStatus) productSearchStatus.textContent = '';
+    return;
+  }
+
+  suggestionTimer = window.setTimeout(async () => {
+    suggestionRequest = new AbortController();
+    try {
+      const url = new URL(productSearchForm.dataset.suggestionsUrl, window.location.origin);
+      url.searchParams.set('q', query);
+      const response = await fetch(url, { signal: suggestionRequest.signal });
+      if (!response.ok) throw new Error(`Suggestion request failed with status ${response.status}`);
+      const data = await response.json();
+      showProductSuggestions(data.suggestions);
+    } catch (error) {
+      if (error.name === 'AbortError') return;
+      productSuggestions.replaceChildren();
+      const message = document.createElement('li');
+      message.className = 'search-suggestion-empty';
+      message.textContent = 'Product suggestions are unavailable right now.';
+      productSuggestions.append(message);
+      productSuggestions.hidden = false;
+      productSearchInput.setAttribute('aria-expanded', 'true');
+      productSearchStatus.textContent = message.textContent;
+      console.error('Product suggestions could not be loaded.', error);
+    }
+  }, 180);
+});
+
+productSearchInput?.addEventListener('keydown', (event) => {
+  const options = productSuggestions?.querySelectorAll('[role="option"]') || [];
+  if (event.key === 'Escape') {
+    closeProductSuggestions();
+    return;
+  }
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    if (!options.length) return;
+    event.preventDefault();
+    const direction = event.key === 'ArrowDown' ? 1 : -1;
+    activeSuggestionIndex = (activeSuggestionIndex + direction + options.length) % options.length;
+    options.forEach((option, index) => {
+      option.setAttribute('aria-selected', String(index === activeSuggestionIndex));
+    });
+    productSearchInput.setAttribute('aria-activedescendant', options[activeSuggestionIndex].id);
+    return;
+  }
+  if (event.key === 'Enter' && activeSuggestionIndex >= 0 && options[activeSuggestionIndex]) {
+    event.preventDefault();
+    window.location.assign(options[activeSuggestionIndex].querySelector('a').href);
+  }
+});
+
+productSearchForm?.addEventListener('focusout', (event) => {
+  if (!productSearchForm.contains(event.relatedTarget)) {
+    window.setTimeout(closeProductSuggestions, 100);
+  }
+});
+
 const updateBagCounts = (count) => {
   const numericCount = Number.isFinite(Number(count)) ? Number(count) : 0;
 

@@ -40,9 +40,17 @@ body{background-image:url("botanical-pattern.svg");background-repeat:repeat;back
 .site-header{grid-template-columns:auto minmax(0,1fr) minmax(150px,210px) auto;gap:clamp(10px,1.5vw,20px)}
 .site-nav{justify-content:center;gap:clamp(9px,1.2vw,17px);white-space:nowrap}
 .header-search-form{height:36px;width:100%;display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.header-search-form{position:relative}
 .header-search-form input{min-width:0;width:100%;padding:7px 4px;border:0;background:transparent;outline:0;color:var(--ink);font-size:11px}
 .header-search-form input::placeholder{color:var(--muted)}
 .header-search-form button{width:32px;height:34px;flex:none;border:0;background:transparent;color:var(--green);font-size:23px;line-height:1;cursor:pointer}
+.search-suggestions{position:absolute;z-index:8;top:calc(100% + 1px);left:0;right:0;max-height:340px;overflow:auto;margin:0;padding:5px 0;background:var(--white);border:1px solid var(--line);box-shadow:0 12px 25px rgba(36,55,47,.12);list-style:none}
+.search-suggestions[hidden]{display:none}
+.search-suggestion a{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px}
+.search-suggestion a:hover,.search-suggestion[aria-selected=true] a{background:var(--paper)}
+.search-suggestion-name{font:500 13px var(--serif);color:var(--ink)}
+.search-suggestion-category{font-size:9px;color:var(--muted)}
+.search-suggestion-empty{padding:11px 12px;color:var(--muted);font-size:11px}
 .header-actions{display:flex;align-items:center;justify-self:end;gap:clamp(8px,1.3vw,17px);white-space:nowrap}
 .header-account-button{min-height:36px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--ink);border-radius:999px;color:var(--ink);font-size:10px;font-weight:600;transition:background .2s,color .2s}
 .header-account-button:hover{background:var(--ink);color:var(--white)}

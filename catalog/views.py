@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from .cart import cart_total, get_cart
@@ -32,7 +33,11 @@ def home(request):
     if category:
         products = products.filter(category=category)
     if query:
-        products = products.filter(name__icontains=query) | products.filter(description__icontains=query)
+        products = products.filter(
+            Q(name__icontains=query)
+            | Q(category__icontains=query)
+            | Q(description__icontains=query)
+        )
     favorite_ids = [int(pid) for pid in request.session.get("favorites", [])]
     return render(request, "catalog/home.html", {
         "products": products,
@@ -41,6 +46,28 @@ def home(request):
         "query": query,
         "featured": Product.objects.filter(available=True, featured=True).first(),
         "favorite_ids": favorite_ids,
+    })
+
+
+def product_suggestions(request):
+    query = request.GET.get("q", "").strip()[:100]
+    if len(query) < 2:
+        return JsonResponse({"suggestions": []})
+
+    products = Product.objects.filter(available=True).filter(
+        Q(name__icontains=query)
+        | Q(category__icontains=query)
+        | Q(description__icontains=query)
+    ).order_by("name")[:6]
+    return JsonResponse({
+        "suggestions": [
+            {
+                "name": product.name,
+                "category": product.get_category_display(),
+                "url": product.get_absolute_url(),
+            }
+            for product in products
+        ],
     })
 
 

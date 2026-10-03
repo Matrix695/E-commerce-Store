@@ -143,6 +143,52 @@ class StoreFlowTests(TestCase):
             response.content.index(b"<main>"),
         )
 
+    def test_product_suggestions_match_category_and_description(self):
+        linen_product = Product.objects.create(
+            name="Soft Throw", slug="soft-throw", category="Textiles", description="Woven linen for quiet evenings.",
+            price="38.00", image_url="https://example.com/throw.jpg",
+        )
+        unavailable_product = Product.objects.create(
+            name="Linen Lampshade", slug="linen-lampshade", category="Lighting", description="Linen shade.",
+            price="38.00", image_url="https://example.com/shade.jpg", available=False,
+        )
+
+        response = self.client.get(reverse("product_suggestions"), {"q": "linen"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            "suggestions": [{
+                "name": linen_product.name,
+                "category": "Textiles",
+                "url": reverse("product_detail", args=[linen_product.slug]),
+            }],
+        })
+        self.assertNotIn(unavailable_product.name, str(response.json()))
+
+    def test_product_suggestions_require_two_characters_and_are_limited(self):
+        for number in range(8):
+            Product.objects.create(
+                name=f"Linen item {number}", slug=f"linen-item-{number}", category="Textiles",
+                description="A linen item.", price="10.00", image_url="https://example.com/item.jpg",
+            )
+
+        self.assertEqual(
+            self.client.get(reverse("product_suggestions"), {"q": "l"}).json(),
+            {"suggestions": []},
+        )
+        response = self.client.get(reverse("product_suggestions"), {"q": "linen"})
+        self.assertEqual(len(response.json()["suggestions"]), 6)
+
+    def test_category_search_shows_matching_products(self):
+        textile_product = Product.objects.create(
+            name="Soft Throw", slug="soft-throw-category", category="Textiles",
+            description="Woven cotton.", price="38.00", image_url="https://example.com/throw.jpg",
+        )
+        response = self.client.get(reverse("home"), {"q": "Textiles"})
+
+        self.assertContains(response, textile_product.name)
+        self.assertNotContains(response, self.product.name)
+
     def test_ajax_add_to_bag_returns_updated_cart_count(self):
         response = self.client.post(
             reverse("cart_add", args=[self.product.pk]),

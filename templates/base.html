@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'catalog/styles.css' %}?v=13">
-  <script defer src="{% static 'catalog/store.js' %}?v=3"></script>
+  <link rel="stylesheet" href="{% static 'catalog/styles.css' %}?v=14">
+  <script defer src="{% static 'catalog/store.js' %}?v=4"></script>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -24,10 +24,12 @@
       <a class="liked-link" href="{% url 'favorites' %}">Liked{% if favorite_count %} <span class="bag-count favorite-count">{{ favorite_count }}</span>{% endif %}</a>
       <a href="{% url 'order_history' %}">Orders</a>
     </nav>
-    <form class="header-search-form" action="{% url 'home' %}#shop" method="get" role="search">
+    <form class="header-search-form" action="{% url 'home' %}#shop" method="get" role="search" data-suggestions-url="{% url 'product_suggestions' %}">
       <label class="sr-only" for="product-search">Search products</label>
-      <input id="product-search" name="q" type="search" placeholder="Search products" value="{{ query|default:'' }}">
+      <input id="product-search" name="q" type="search" placeholder="Search products" value="{{ query|default:'' }}" autocomplete="off" aria-autocomplete="list" aria-controls="product-search-suggestions" aria-expanded="false">
       <button type="submit" aria-label="Search products">⌕</button>
+      <ul class="search-suggestions" id="product-search-suggestions" role="listbox" aria-label="Product suggestions" hidden></ul>
+      <span class="sr-only" id="product-search-status" aria-live="polite"></span>
     </form>
     <div class="header-actions">
       <a class="bag-link" href="{% url 'cart' %}" aria-label="Shopping bag, {{ cart_count }} items">
