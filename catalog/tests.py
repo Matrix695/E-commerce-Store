@@ -5,6 +5,16 @@ from .models import CustomerProfile, Order, OrderItem, Product
 
 
 class AuthenticationFlowTests(TestCase):
+    def test_login_register_button_is_next_to_bag_outside_navigation(self):
+        response = self.client.get(reverse("home"))
+        content = response.content.decode()
+        nav = content.split('<nav class="site-nav"', 1)[1].split("</nav>", 1)[0]
+        header_actions = content.split('<div class="header-actions">', 1)[1].split("</div>", 1)[0]
+
+        self.assertNotIn("Login/Register", nav)
+        self.assertIn('href="/accounts/login/">Login/Register</a>', header_actions)
+        self.assertIn('href="/cart/"', header_actions)
+
     def test_registration_form_places_contact_number_after_email(self):
         response = self.client.get(reverse("register"))
 
@@ -116,6 +126,22 @@ class StoreFlowTests(TestCase):
         self.assertRedirects(response, reverse("cart"))
         self.assertEqual(self.client.session["cart"], {str(self.product.pk): 2})
         self.assertContains(self.client.get(reverse("cart")), "₹48")
+
+    def test_home_search_filters_products_by_name_and_preserves_query(self):
+        other_product = Product.objects.create(
+            name="Linen Throw", slug="linen-throw", category="Textiles", description="A soft throw.",
+            price="38.00", image_url="https://example.com/throw.jpg",
+        )
+
+        response = self.client.get(reverse("home"), {"q": "linen"})
+
+        self.assertContains(response, other_product.name)
+        self.assertNotContains(response, self.product.name)
+        self.assertContains(response, 'id="product-search" name="q" type="search" placeholder="Search products" value="linen"')
+        self.assertLess(
+            response.content.index(b'class="header-search-form"'),
+            response.content.index(b"<main>"),
+        )
 
     def test_ajax_add_to_bag_returns_updated_cart_count(self):
         response = self.client.post(

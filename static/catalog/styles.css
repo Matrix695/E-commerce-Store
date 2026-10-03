@@ -37,3 +37,16 @@ body{background-image:url("botanical-pattern.svg");background-repeat:repeat;back
 .auth-switch{margin:23px 0 0;text-align:center;color:var(--muted);font-size:11px}
 .auth-switch a{color:var(--green);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:640px){.auth-card{padding:29px 23px}.account-name{font-size:10px}}
+.site-header{grid-template-columns:auto minmax(0,1fr) minmax(150px,210px) auto;gap:clamp(10px,1.5vw,20px)}
+.site-nav{justify-content:center;gap:clamp(9px,1.2vw,17px);white-space:nowrap}
+.header-search-form{height:36px;width:100%;display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.header-search-form input{min-width:0;width:100%;padding:7px 4px;border:0;background:transparent;outline:0;color:var(--ink);font-size:11px}
+.header-search-form input::placeholder{color:var(--muted)}
+.header-search-form button{width:32px;height:34px;flex:none;border:0;background:transparent;color:var(--green);font-size:23px;line-height:1;cursor:pointer}
+.header-actions{display:flex;align-items:center;justify-self:end;gap:clamp(8px,1.3vw,17px);white-space:nowrap}
+.header-account-button{min-height:36px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--ink);border-radius:999px;color:var(--ink);font-size:10px;font-weight:600;transition:background .2s,color .2s}
+.header-account-button:hover{background:var(--ink);color:var(--white)}
+.header-logout{display:inline}
+.header-logout button{padding:0;border:0;background:transparent;font:inherit;font-size:11px;color:inherit;cursor:pointer}
+@media(max-width:900px){.site-header{grid-template-columns:auto minmax(0,1fr) minmax(130px,170px) auto;padding:0 24px;gap:10px}.site-nav{gap:8px;font-size:10px}.header-actions{gap:8px}.header-account-button{padding:0 8px;font-size:9px}}
+@media(max-width:640px){.site-header{height:108px;padding:0 20px;grid-template-columns:38px 1fr auto;grid-template-rows:64px 44px;column-gap:8px}.menu-toggle{grid-column:1;grid-row:1}.wordmark{grid-column:2;grid-row:1}.header-actions{grid-column:3;grid-row:1}.header-search-form{grid-column:1/-1;grid-row:2;width:min(100%,500px);justify-self:center}.site-nav{top:107px}.header-actions{gap:8px}.header-account-button{min-height:32px;padding:0 8px;font-size:8px}.account-name{display:none}.header-logout button{font-size:9px}}

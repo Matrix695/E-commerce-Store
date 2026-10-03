@@ -24,7 +24,6 @@
 <section class="shop-section" id="shop">
   <div class="section-heading">
     <div><p class="eyebrow">The considered collection</p><h2>Bring a little <em>better</em> home.</h2></div>
-    <form class="search-form" action="{% url 'home' %}#shop" method="get"><label class="sr-only" for="search">Search products</label><input id="search" name="q" type="search" placeholder="Search the shop" value="{{ query }}"><button aria-label="Search">⌕</button></form>
   </div>
   <div class="shop-tools">
     <nav class="category-tabs" aria-label="Shop by category">
@@ -56,55 +55,4 @@
   </div>
 </section>
 <section class="note-band"><div class="note-image" role="img" aria-label="A calm, naturally furnished room"></div><div class="note-copy"><p class="eyebrow">The Haven point of view</p><h2>Less, but<br><em>more meaningful.</em></h2><p>We believe the things we live with should earn their place. That's why we look for thoughtful design, materials that age well, and makers who care how things are made.</p><a class="button button-dark" href="#shop">Explore the collection <span>↗</span></a></div></section>
-{% endblock %}
-
-{% block js %}
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const form = document.querySelector(".search-form");
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
-      const query = form.querySelector("input[name='q']").value;
-      window.location.href = "{% url 'home' %}#shop?q=" + encodeURIComponent(query);
-    });
-  });
-</script>
-{% endblock %}
-
-{% block css %}
-<style>
-  .search-form {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-  }
-  .search-form input {
-    padding: 0.5em;
-    border: 1px solid #ccc;
-    border-radius: 0.25em;
-  }
-  .search-form button {
-    padding: 0.5em;
-    border: 1px solid #ccc;
-    border-radius: 0.25em;
-    background-color: #f5f5f5;
-  }
-</style>
-{% endblock %}
-
-{% block background %}
-{
-    "owner": "django",
-    "pattern": [
-        {
-            "regexp": "^$"
-        }
-    ],
-    "background": {
-        "activeOnStart": true,
-        "beginsPattern": "Starting development server at",
-        "endsPattern": "Starting development server at"
-    }
-}
 {% endblock %}
