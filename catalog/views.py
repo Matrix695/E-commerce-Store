@@ -1,10 +1,28 @@
 from django.contrib import messages
+from django.contrib.auth import login
 from django.db import transaction
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from .cart import cart_total, get_cart
-from .forms import CheckoutForm
-from .models import Order, OrderItem, Product
+from .forms import CheckoutForm, UserRegistrationForm
+from .models import CustomerProfile, Order, OrderItem, Product
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+    form = UserRegistrationForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            user = form.save()
+            CustomerProfile.objects.create(
+                user=user,
+                contact_number=form.cleaned_data["contact_number"],
+            )
+        login(request, user)
+        messages.success(request, "Your account has been created.")
+        return redirect("home")
+    return render(request, "accounts/register.html", {"form": form})
 
 
 def home(request):

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Log in — Haven{% endblock %}
+{% block content %}
+<section class="auth-page">
+  <div class="auth-card">
+    <p class="eyebrow">Welcome back</p>
+    <h1>Log in</h1>
+    <p class="auth-intro">Use your Haven account to continue.</p>
+    <form class="auth-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="field-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <div class="field-wrap">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<small class="field-error">{{ field.errors|join:", " }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="button button-dark" type="submit">Log in <span>→</span></button>
+    </form>
+    <p class="auth-switch">New to Haven? <a href="{% url 'register' %}">Create an account</a></p>
+  </div>
+</section>
+{% endblock %}

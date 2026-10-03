@@ -1,6 +1,107 @@
 from django.test import TestCase
 from django.urls import reverse
-from .models import Order, OrderItem, Product
+from django.contrib.auth.models import User
+from .models import CustomerProfile, Order, OrderItem, Product
+
+
+class AuthenticationFlowTests(TestCase):
+    def test_registration_form_places_contact_number_after_email(self):
+        response = self.client.get(reverse("register"))
+
+        self.assertEqual(
+            list(response.context["form"].fields),
+            ["username", "email", "contact_number", "password1", "password2"],
+        )
+
+    def test_registration_creates_user_with_hashed_password_and_logs_them_in(self):
+        response = self.client.post(reverse("register"), {
+            "username": "new-customer",
+            "email": "new@example.com",
+            "contact_number": "+1 555 010 2040",
+            "password1": "A-strong-password-123",
+            "password2": "A-strong-password-123",
+        })
+
+        user = User.objects.get(username="new-customer")
+        self.assertRedirects(response, reverse("home"))
+        self.assertTrue(user.check_password("A-strong-password-123"))
+        self.assertNotEqual(user.password, "A-strong-password-123")
+        self.assertEqual(user.customer_profile.contact_number, "+1 555 010 2040")
+        self.assertEqual(self.client.session["_auth_user_id"], str(user.pk))
+
+    def test_registration_requires_contact_number(self):
+        response = self.client.post(reverse("register"), {
+            "username": "no-phone",
+            "email": "no-phone@example.com",
+            "password1": "A-strong-password-123",
+            "password2": "A-strong-password-123",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username="no-phone").exists())
+        self.assertContains(response, "This field is required.")
+
+    def test_login_rejects_wrong_password_and_accepts_email_or_contact_number(self):
+        user = User.objects.create_user(
+            username="returning-customer",
+            email="returning@example.com",
+            password="Correct-password-456",
+        )
+        CustomerProfile.objects.create(user=user, contact_number="+1 555 010 2041")
+
+        response = self.client.post(reverse("login"), {
+            "username": user.email,
+            "password": "incorrect-password",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Please enter a correct email address or contact number and password.")
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+        response = self.client.post(reverse("login"), {
+            "username": user.email,
+            "password": "Correct-password-456",
+        })
+
+        self.assertRedirects(response, reverse("home"))
+        self.assertEqual(self.client.session["_auth_user_id"], str(user.pk))
+
+        self.client.post(reverse("logout"))
+        response = self.client.post(reverse("login"), {
+            "username": "+1 555 010 2041",
+            "password": "Correct-password-456",
+        })
+        self.assertRedirects(response, reverse("home"))
+        self.assertEqual(self.client.session["_auth_user_id"], str(user.pk))
+
+    def test_login_does_not_accept_username_as_identifier(self):
+        User.objects.create_user(
+            username="username-only",
+            email="customer@example.com",
+            password="Correct-password-456",
+        )
+
+        response = self.client.post(reverse("login"), {
+            "username": "username-only",
+            "password": "Correct-password-456",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_registration_rejects_duplicate_email(self):
+        User.objects.create_user(username="existing", email="taken@example.com", password="Strong-pass-123")
+
+        response = self.client.post(reverse("register"), {
+            "username": "new-customer",
+            "email": "TAKEN@example.com",
+            "contact_number": "+1 555 010 2042",
+            "password1": "A-strong-password-123",
+            "password2": "A-strong-password-123",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username="new-customer").exists())
 
 
 class StoreFlowTests(TestCase):

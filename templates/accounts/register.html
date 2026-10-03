@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Create an account — Haven{% endblock %}
+{% block content %}
+<section class="auth-page">
+  <div class="auth-card">
+    <p class="eyebrow">Make yourself at home</p>
+    <h1>Create an account</h1>
+    <p class="auth-intro">Save your details for your next visit.</p>
+    <form class="auth-form" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="field-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <div class="field-wrap">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<small class="field-help">{{ field.help_text|safe }}</small>{% endif %}
+          {% if field.errors %}<small class="field-error">{{ field.errors|join:", " }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="button button-dark" type="submit">Create account <span>→</span></button>
+    </form>
+    <p class="auth-switch">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+  </div>
+</section>
+{% endblock %}

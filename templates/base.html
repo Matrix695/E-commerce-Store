@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'catalog/styles.css' %}?v=10">
+  <link rel="stylesheet" href="{% static 'catalog/styles.css' %}?v=11">
   <script defer src="{% static 'catalog/store.js' %}?v=3"></script>
   {% block extra_head %}{% endblock %}
 </head>
@@ -24,6 +24,12 @@
       <a href="{% url 'home' %}?category=Lighting#shop">Lighting</a>
       <a class="liked-link" href="{% url 'favorites' %}">Liked{% if favorite_count %} <span class="bag-count favorite-count">{{ favorite_count }}</span>{% endif %}</a>
       <a href="{% url 'order_history' %}">Orders</a>
+      {% if user.is_authenticated %}
+        <span class="account-name">{{ user.username }}</span>
+        <form class="nav-logout" method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+      {% else %}
+        <a href="{% url 'login' %}">Login/Register</a>
+      {% endif %}
     </nav>
     <a class="bag-link" href="{% url 'cart' %}" aria-label="Shopping bag, {{ cart_count }} items">
       <svg class="bag-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>

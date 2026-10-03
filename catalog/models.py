@@ -3,6 +3,14 @@ from django.db import models
 from django.urls import reverse
 
 
+class CustomerProfile(models.Model):
+    user = models.OneToOneField("auth.User", related_name="customer_profile", on_delete=models.CASCADE)
+    contact_number = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.user.username
+
+
 class Product(models.Model):
     CATEGORY_CHOICES = [("Objects", "Objects"), ("Textiles", "Textiles"), ("Lighting", "Lighting"), ("Table", "Table")]
     name = models.CharField(max_length=140)
